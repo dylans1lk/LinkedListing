@@ -24,8 +24,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
+        // Each menu ID is passed as a set of IDs so each can be considered a top lvl destination.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_inventory, R.id.navigation_listings, R.id.navigation_messages, R.id.navigation_profile)
                 .build();

@@ -1,3 +1,5 @@
+// This is the LISTINGS FRAGMENT aka the definition of the listings page's display/layout
+// Here we convert the corresponding XML file into the corresponding ViewModel objects.
 package com.app.linkedlisting.ui.listings;
 
 import android.os.Bundle;

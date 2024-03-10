@@ -1,3 +1,5 @@
+// This is the MESSAGES FRAGMENT aka the definition of the messages page's display/layout
+// Here we convert the corresponding XML file into the corresponding ViewModel objects.
 package com.app.linkedlisting.ui.messages;
 
 import android.os.Bundle;

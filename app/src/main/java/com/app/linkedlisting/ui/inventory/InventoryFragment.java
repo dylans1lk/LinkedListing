@@ -1,3 +1,5 @@
+// This is the INVENTORY FRAGMENT aka the definition of the inventory page's display/layout
+// Here we convert the corresponding XML file into the corresponding ViewModel objects.
 package com.app.linkedlisting.ui.inventory;
 
 import android.os.Bundle;
@@ -16,6 +18,8 @@ public class InventoryFragment extends Fragment {
 
     private FragmentInventoryBinding binding;
 
+    // This section helps establish the fragment's UI via updating/initializing
+    // the layout and the ViewModel
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         InventoryViewModel homeViewModel =
@@ -24,6 +28,7 @@ public class InventoryFragment extends Fragment {
         binding = FragmentInventoryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Changes the text that's being displayed based on any changes in the LiveData
         final TextView textView = binding.textInventory;
         homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;

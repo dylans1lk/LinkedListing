@@ -1,3 +1,5 @@
+// This is the PROFILE FRAGMENT aka the definition of the profile page's display/layout
+// Here we convert the corresponding XML file into the corresponding ViewModel objects.
 package com.app.linkedlisting.ui.profile;
 
 import android.os.Bundle;
