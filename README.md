@@ -65,6 +65,8 @@ This will pull all the latest changes made by your teammates to your project on 
 After that make sure to activate the virtual environment again in the backend folder:
 
 ```bash
+cd backend
+
 source venv/Scripts/activate  # On Windows
 source venv/bin/activate  # On macOS/Linux
 ```
