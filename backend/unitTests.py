@@ -34,11 +34,5 @@ class FlaskAppTests(unittest.TestCase):
         response = self.app.get('/items/string')  # Invalid ID type
         self.assertEqual(response.status_code, 404)
 
-    # Failing test for CI
-  #  def test_home_route(self):
-  #      response = self.app.get('/')
-  #      self.assertEqual(response.status_code, 404)  # This line is modified to expect a 404 status, causing the test to fail.
-
-
 if __name__ == '__main__':
     unittest.main()
