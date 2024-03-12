@@ -4,7 +4,6 @@ Welcome to the LinkedListing project! This guide will walk you through the initi
 
 ## Prerequisites
 
-- Node.js and npm installed on your system.
 - Python installed on your system.
 - Git installed on your system.
 - Visual Studio Code (VS Code) or your preferred IDE installed.
@@ -37,24 +36,11 @@ python -m venv venv
 source venv/Scripts/activate  # On Windows
 source venv/bin/activate  # On macOS/Linux
 ```
-Install flask:
+Install requirements:
 ```bash
-pip install flask
+pip install -r requirements.txt
 ```
 
-## Frontend Setup
-
-Navigate back to the Frontend
-
-```bash
-cd ..
-cd frontend
-```
-Install the required npm packages:
-
-```bash
-npm install
-```
 
 ## Daily Tasks
 
@@ -70,6 +56,15 @@ cd backend
 source venv/Scripts/activate  # On Windows
 source venv/bin/activate  # On macOS/Linux
 ```
+## Testing
+
+To test the project simply run:
+
+```bash
+python unitTests.py
+```
+
+
 
 
 
