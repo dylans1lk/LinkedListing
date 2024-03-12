@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # Function to load items from test.json
 def load_items():
-    with open('test.json') as f:
+    with open('backend/test.json') as f:
         return json.load(f)["items"]
 
 @app.route('/')
