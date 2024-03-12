@@ -16,7 +16,7 @@
                     android:color="@color/lightBlue"
                     android:offset="0.0" />
                 <item
-                    android:color="@color/lightRed"
+                    android:color="@color/black"
                     android:offset="1.0" />
             </gradient>
         </aapt:attr>
