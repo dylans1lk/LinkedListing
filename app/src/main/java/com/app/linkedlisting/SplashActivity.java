@@ -8,16 +8,20 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SplashActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore mFirestore;
     private EditText emailEditText, passwordEditText;
     private Button loginButton, signupButton;
 
@@ -27,6 +31,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         mAuth = FirebaseAuth.getInstance();
+        mFirestore = FirebaseFirestore.getInstance(); // Initialize Firestore
 
         emailEditText = findViewById(R.id.usernameOrEmailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
@@ -35,12 +40,10 @@ public class SplashActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(v -> loginUser());
         signupButton.setOnClickListener(v -> {
-            // Navigate to SignUpActivity for new user registration
             Intent signupIntent = new Intent(SplashActivity.this, SignUpActivity.class);
             startActivity(signupIntent);
         });
 
-        // Automatically attempt to log in if credentials are valid/saved
         autoLogin();
     }
 
@@ -49,23 +52,40 @@ public class SplashActivity extends AppCompatActivity {
         if (currentUser != null) {
             navigateToMainActivity();
         }
-        // Else, stay on this activity for user to log in or sign up
     }
 
     private void loginUser() {
-        String email = emailEditText.getText().toString().trim();
+        String input = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please enter both email and password.", Toast.LENGTH_SHORT).show();
+        if (input.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please enter both email/username and password.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        if (input.contains("@")) {
+            signInWithEmail(input, password);
+        } else {
+            lookupEmailFromUsername(input, password);
+        }
+    }
+
+    private void lookupEmailFromUsername(String username, String password) {
+        mFirestore.collection("usernames").document(username).get().addOnSuccessListener(documentSnapshot -> {
+            String email = documentSnapshot.getString("email"); // Make sure "email" matches the field in Firestore
+            if (email != null) {
+                signInWithEmail(email, password);
+            } else {
+                Toast.makeText(SplashActivity.this, "Username not found.", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(e -> Toast.makeText(SplashActivity.this, "Error checking username.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void signInWithEmail(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 navigateToMainActivity();
             } else {
-                // Improved error handling for specific auth failures
                 handleAuthFailure(task);
             }
         });
