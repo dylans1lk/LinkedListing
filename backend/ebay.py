@@ -1,7 +1,8 @@
 from ebaysdk.trading import Connection as Trading
 import database
 import asyncio
-from datetime import datetime
+from datetime import date
+from fuzzywuzzy import process
 
 class Trader:
     def __init__(self):
@@ -12,60 +13,74 @@ class Trader:
                   certid='SBX-aec0cd29b2b5-08d2-4fad-bb4c-4909',
                   token='v^1.1#i^1#I^3#f^0#r^1#p^3#t^Ul4xMF85OkE0Q0Q1NEFFQzU5OTA0REIwRUE2M0I2NDU5MkJEMDA5XzBfMSNFXjEyODQ=')
 
-    def find_best_category(self, keywords):
-        suggested_categories = self.api.execute('GetSuggestedCategories')
+    def get_category(self, search_name):
+        try:
+            api = Trading(domain='api.sandbox.ebay.com',
+                config_file=None,
+                appid='AidanJav-linkedli-SBX-1aec0cd29-2ed6e7cc',
+                devid='dbc7ab68-ddc8-4327-ab11-bcfa8d0f442d',
+                certid='SBX-aec0cd29b2b5-08d2-4fad-bb4c-4909',
+                token='v^1.1#i^1#I^3#f^0#r^1#p^3#t^Ul4xMF85OkE0Q0Q1NEFFQzU5OTA0REIwRUE2M0I2NDU5MkJEMDA5XzBfMSNFXjEyODQ=')
 
-        categories = suggested_categories.get('SuggestedCategoryArray', {}).get('SuggestedCategory', [])
-        if not categories:
-            print("No categories found.")
-            return None
+            response = api.execute('GetCategories', {
+                'DetailLevel': 'ReturnAll',
+                'CategorySiteID': '0',
+                'LevelLimit': 10  # Adjust based on depth (keep 10)
+            })
 
-        best_category = categories[0]['Category']
-        print(f"Best category for '{keywords}': {best_category['CategoryName']} (ID: {best_category['CategoryID']})")
-        return best_category['CategoryID']
+            categories = response.dict().get('CategoryArray', {}).get('Category', [])
+            names = [(category['CategoryName'], category['CategoryID']) for category in categories]
+            
+            # Find the closest match
+            best_match = process.extractOne(search_name, names, score_cutoff=70)  # Adjust score_cutoff as needed
+            
+            if best_match:
+                return str(best_match[0][1])
+            else:
+                return '37978'
 
-    def create_listing(self, title, description, seller, item, price, condition, listing_date):
+        except Exception as e:
+            print("Error:", e)
+        
+    def create_listing(self, title, description, item, price):
         request = {
-            "Item": {
-                "Title": title,
-                "Description": description,
-                "PrimaryCategory": {"CategoryID": "20081"},
-                "StartPrice": str(price),
-                "CategoryMappingAllowed": "true",
-                "Country": "US",
-                "Currency": "USD",
-                "ConditionID": "1000", # Brand new
-                "DispatchTimeMax": "3",
-                "ListingDuration": "Days_7",
-                "ListingType": "FixedPriceItem",
-                # Payment/Address will be from seller info
-                "PaymentMethods": ["PayPal"],
-                "PayPalEmailAddress": "seller@example.com",
-                "PostalCode": "12345",
-                "Quantity": "1",
-                "ReturnPolicy": {
-                    "ReturnsAcceptedOption": "ReturnsAccepted",
-                    "RefundOption": "MoneyBack",
-                    "ReturnsWithinOption": "Days_30",
-                    "Description": "Temp description. Selling bike",
-                    "ShippingCostPaidByOption": "Buyer"
-                },
-                "ShippingDetails": {
-                    "ShippingType": "Flat",
-                    "ShippingServiceOptions": {
-                        "ShippingServicePriority": "1",
-                        "ShippingService": "USPSMedia",
-                        "ShippingServiceCost": "10.00"
-                    }
-                },
-                "Site": "US"
-            }
+        'Item': {
+            'Title': title,
+            'Description': description,
+            'PrimaryCategory': {'CategoryID': self.get_category(item)}, # Category id
+            'StartPrice': price,
+            'ConditionID': '3000',  # Condition ID (used)
+            'CategoryMappingAllowed': True,
+            'Country': 'US',
+            'Currency': 'USD',
+            'DispatchTimeMax': '3',
+            'ListingDuration': 'GTC',  # Good Til Cancelled
+            'ListingType': 'FixedPriceItem',
+            'PaymentMethods': [],
+            'PostalCode': '94043',
+            'Quantity': '1',
+            'ReturnPolicy': {
+                'ReturnsAcceptedOption': 'ReturnsAccepted',
+                'RefundOption': 'MoneyBack',
+                'ReturnsWithinOption': 'Days_30',
+                'ShippingCostPaidByOption': 'Buyer'
+            },
+            'ShippingDetails': {
+                'ShippingType': 'Flat',
+                'ShippingServiceOptions': {
+                    'ShippingServicePriority': '1',
+                    'ShippingService': 'UPSGround',
+                    'ShippingServiceCost': '0.00'
+                }
+            },
+            'Site': 'US'
         }
+    }
 
         try:
             response = self.api.execute('AddItem', request)
             print(f'Successfully listed item with ItemID: {response.reply.ItemID}')
-            asyncio.run(database.add_listing_to_db(title, description, seller, item, response.reply.ItemID, price, condition, listing_date))
+            # asyncio.run(database.add_listing_to_db(title, description, seller, item, response.reply.ItemID, price, date.today().strftime("%m/%d/%y")))
         except Exception as e:
             print(f'Failed to list item: {e}')
     
@@ -80,10 +95,8 @@ class Trader:
                 return True
             else:
                 print(f'Failed to end listing. Error: {response.reply.Errors.LongMessage}')
-                return False
         except Exception as e:
             print(f'Exception during end listing: {e}')
-            return False
 
     def change_listing_title(self, item_id, new_title):
 
@@ -128,3 +141,7 @@ class Trader:
 
         except Exception as e:
             print(f"Error: {str(e)}")
+
+# Code which creates a listing for a camry
+# x = Trader()
+# x.create_listing("2008 Toyota Camry", "old car for sale", "Automobile", 2000) # title, description, item, price
