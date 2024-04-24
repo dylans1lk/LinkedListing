@@ -56,6 +56,10 @@ cd backend
 source venv/Scripts/activate  # On Windows
 source venv/bin/activate  # On macOS/Linux
 ```
+## Running
+
+python app.py
+
 ## Testing
 
 To test the project simply run:
