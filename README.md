@@ -60,6 +60,8 @@ source venv/bin/activate  # On macOS/Linux
 
 python app.py
 
+Once this is running you will need to go the frontend and begin setup.
+
 ## Testing
 
 To test the project simply run:
